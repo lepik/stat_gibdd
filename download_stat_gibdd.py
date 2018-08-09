@@ -25,6 +25,16 @@ urlGetCook = 'http://stat.gibdd.ru/'
 urlPost = 'http://stat.gibdd.ru/getCardsXML'
 urlGetDown = 'http://stat.gibdd.ru/getPDFbyId?data='
 
+okrug = 877
+region = 7
+path_down_zip = '.\\ZIP\\'
+path_unzip_xml = '.\\XML\\'
+
+def check_path():
+    if not os.path.exists(path_down_zip):
+        os.makedirs(path_down_zip)
+    if not os.path.exists(path_unzip_xml):
+        os.makedirs(path_unzip_xml)
 
 def create_log():
     with open(log_filename, 'w') as f:
@@ -41,6 +51,10 @@ def build_payload(date_start, date_end):
     #payload = {"data":"{\"date_s\":\"01.01.2015\",\"date_end\":\"30.01.2015\",\"ParReg\":\"877\",\"order\":{\"type\":1,\"fieldName\":\"dat\"},\"reg\":[\"7\"],\"ind\":\"1\",\"exportType\":1}"}
     payload["data"]["date_s"] = str(date_start)
     payload["data"]["date_end"] = str(date_end)
+    payload["data"]["ParReg"] = str(okrug)
+    reg = []
+    reg.append(str(region))
+    payload["data"]["reg"] = reg
     payload_json = {}
     payload_json["data"] = json.dumps(payload["data"], separators=(',', ':')).encode('utf8').decode('unicode-escape')
     return payload_json
@@ -53,12 +67,12 @@ def file_unzip(zip_file):
             log_txt = "Unzip file: "+zip_file
             print(log_txt)
             write_log(log_txt)
-            os.rename(file, ".\\XML\\"+zip_file+'.xml')
-            log_txt = "Rename: "+file+" to "+zip_file+'.xml'
+            os.rename(file, path_unzip_xml + zip_file + '.xml')
+            log_txt = "Rename: " + file + " to " + zip_file + '.xml'
             print(log_txt)
             write_log(log_txt)
     zip.close()
-    os.rename(zip_file, ".\\ZIP\\"+zip_file)
+    os.rename(zip_file, path_down_zip + zip_file)
     log_txt = "****************************************************************"
     print(log_txt)
     write_log(log_txt)
@@ -106,6 +120,7 @@ def manual_period(d_start, d_end):
         write_log(log_txt)
 
 def main():
+    check_path()
     if not os.path.exists(log_filename):
         create_log()
     write_log("Run script...")
